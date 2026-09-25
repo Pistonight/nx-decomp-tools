@@ -630,15 +630,7 @@ fn show_asm_differ(
 }
 
 fn get_asm_differ_path() -> Result<PathBuf> {
-    let base_path = repo::get_tools_path()?;
-
-    // use the virtual env if one is setup with setup_python_venv()
-    let differ_path_venv = base_path.join(".venv/bin/asm-differ");
-    if differ_path_venv.exists() {
-        return Ok(differ_path_venv);
-    }
-
-    Ok(base_path.join("asm-differ/diff.py"))
+    Ok(repo::get_tools_path()?.join("run-asm-differ.py"))
 }
 
 fn rediff_function_after_differ(

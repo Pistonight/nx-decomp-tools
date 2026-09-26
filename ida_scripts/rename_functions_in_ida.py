@@ -7,7 +7,7 @@
 import csv
 import idc
 import os
-from ..src.nx_decomp_tools.util.config import get_functions_csv_path
+from .nx_decomp_tools.util.config import get_functions_csv_path
 
 csv_path = get_functions_csv_path()
 

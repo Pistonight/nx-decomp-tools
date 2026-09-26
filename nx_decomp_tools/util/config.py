@@ -1,11 +1,41 @@
 from pathlib import Path
 from typing import cast
 
-NX_DECOMP_TOOLS_PATH = Path(__file__).resolve().parent.parent.parent.parent
 DEFAULT_VERSION_TOKEN = "<default_version>"
+
+def _get_nx_decomp_tools_path() -> Path:
+    # we must be at tools/common of a downstream project,
+    # NOT installed as a pip package.
+    # If installed into a venv somewhere, that makes it impossible
+    # to figure out the repo path, because the venv can be
+    # anywhere on the system (i.e. might not be tools/.venv if downstream
+    # doesn't use UV)
+
+    root = Path(__file__).resolve().parent.parent.parent
+    if root.name == "site-packages":
+        raise RuntimeError("Cannot determine nx-decomp-tools path. \
+nx-decomp-tools appears to be installed as a pip module in your current venv. \
+This is currently not supported. You must add nx-decomp-tools as a workspace member.")
+
+    # probe pyproject.toml to ensure downstream has put us in the right spot
+    pyproject_toml = root / "pyproject.toml"
+    try:
+        txt = pyproject_toml.read_text()
+        if "name = \"nx-decomp-tools\"" in txt:
+            return root
+    except:
+        pass
+
+    raise RuntimeError("Cannot determine nx-decomp-tools path. \
+Make sure nx-decomp-tools is cloned at tools/common in your project, \
+and included as a workspace member in pyproject.toml")
+
+NX_DECOMP_TOOLS_PATH = _get_nx_decomp_tools_path()
+
 
 def get_repo_root() -> Path:
     """Get the root of the downstream project"""
+    
     # downstream projects are expected to include this repo
     # as a submodule at tools/common
     return NX_DECOMP_TOOLS_PATH.parent.parent
